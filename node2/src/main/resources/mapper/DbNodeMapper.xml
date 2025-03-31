@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.DbNodeMapper">
+  <update id="updateRefreshTime" parameterType="com.example.demo.eneity.DbNode">
+    update db_node set refresh_time=#{refreshTime} where node_Tag=#{nodeTag}
+  </update>
+
+  <select id="getAllAliveDbNodes" resultType="com.example.demo.eneity.DbNode">
+    select * from db_node where alive_or_not=true
+  </select>
+
+  <select id="getDbNodeByTag" parameterType="java.lang.String" resultType="com.example.demo.eneity.DbNode">
+    select * from db_node where node_Tag=#{nodeTag}
+  </select>
+
+  <update id="updateMasterState" parameterType="com.example.demo.eneity.DbNode">
+    update db_node set master_or_not=#{masterOrNot} where node_Tag=#{nodeTag}
+  </update>
+
+  <update id="updateAliveState" parameterType="com.example.demo.eneity.DbNode">
+    update db_node set alive_or_not=#{aliveOrNot} where node_Tag=#{nodeTag}
+  </update>
+
+  <select id="getAllDeadDbNodes" resultType="com.example.demo.eneity.DbNode">
+    select * from db_node where alive_or_not=false
+  </select>
+
+  <select id="getMasterNode" resultType="com.example.demo.eneity.DbNode">
+    select * from db_node where master_or_not=true limit 1
+  </select>
+</mapper>
