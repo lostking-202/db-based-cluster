@@ -22,10 +22,10 @@
 		<developer/>
 	</developers>
   <modules>
-    <module>node1</module>
-		<module>node2</module>
-		<module>node3</module>
-	</modules>
+    <module>primary</module>
+    <module>ddl-initializer</module>
+    <module>standby</module>
+  </modules>
   <scm>
 		<connection/>
 		<developerConnection/>
@@ -62,21 +62,6 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.7.5</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>11.5.0</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql -->
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-database-postgresql</artifactId>
-			<version>11.5.0</version>
-			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>

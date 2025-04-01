@@ -1,0 +1,20 @@
+nodeTag: node4
+refreshDurateMills: 10000
+
+spring.datasource.url: jdbc:postgresql://localhost:5432/pg_test
+spring.datasource.username: postgres
+spring.datasource.password: root
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto: none
+spring.jpa.database-platform: org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.show-sql: true
+
+server.port: ${random.int[2000,65535]}
+
+logging.level:
+  com.example.demo.mapper: debug
+mybatis.configuration.log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+mybatis.configuration.map-underscore-to-camel-case: true
+
+mybatis.mapper-locations:
+  - classpath:mapper/*.xml
