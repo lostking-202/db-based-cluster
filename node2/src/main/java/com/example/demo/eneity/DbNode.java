@@ -21,6 +21,10 @@ public class DbNode {
   private Instant refreshTime;
   @Column(nullable = false,unique = true)
   private String nodeTag;
+  @Column(nullable = false)
+  private Instant updateTime;
+  @Column(nullable = false)
+  private String updateNodeTag;
 
   public Integer getId() {
     return id;
@@ -68,5 +72,21 @@ public class DbNode {
 
   public void setAliveOrNot(Boolean aliveOrNot) {
     this.aliveOrNot = aliveOrNot;
+  }
+
+  public Instant getUpdateTime() {
+    return updateTime;
+  }
+
+  public void setUpdateTime(Instant updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public String getUpdateNodeTag() {
+    return updateNodeTag;
+  }
+
+  public void setUpdateNodeTag(String updateNodeTag) {
+    this.updateNodeTag = updateNodeTag;
   }
 }

@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NodeRefreshTask  implements InitializingBean {
+public class NodeRefreshTask implements InitializingBean {
 
   @Autowired
   DbNodeMapper dbNodeMapper;
@@ -29,58 +29,74 @@ public class NodeRefreshTask  implements InitializingBean {
     TimerTask timerTask=new TimerTask() {
       @Override
       public void run() {
+        try {
 
-        var currentNode=dbNodeMapper.getDbNodeByTag(nodeTag);
-        var nodeTag=currentNode.getNodeTag();
-        var now=Instant.now();
-        currentNode.setRefreshTime(now);
-        dbNodeMapper.updateRefreshTime(currentNode);
-        if(!currentNode.getAliveOrNot()){
-          currentNode.setAliveOrNot(true);
-          dbNodeMapper.updateAliveState(currentNode);
-        }
-
-        // 判断主节点假活
-        var masterNode=dbNodeMapper.getMasterNode();
-        if(masterNode!=null){
-          if(Duration.between(masterNode.getRefreshTime(),now).toMillis()>refreshDurateMills*2){
-            masterNode.setMasterOrNot(false);
-            dbNodeMapper.updateMasterState(masterNode);
+          var currentNode=dbNodeMapper.getDbNodeByTag(nodeTag);
+          var nodeTag=currentNode.getNodeTag();
+          var now=Instant.now();
+          currentNode.setRefreshTime(now);
+          currentNode.setUpdateTime(now);
+          currentNode.setUpdateNodeTag(nodeTag);
+          dbNodeMapper.updateRefreshTime(currentNode);
+          if(!currentNode.getAliveOrNot()){
+            currentNode.setAliveOrNot(true);
+            currentNode.setUpdateTime(now);
+            currentNode.setUpdateNodeTag(nodeTag);
+            dbNodeMapper.updateAliveState(currentNode);
           }
-        }
 
-        // 获取所有活着的节点
-        var aliveNodes=dbNodeMapper.getAllAliveDbNodes();
-        var realAliveNodes=aliveNodes.stream().filter(node->{
-          if(Duration.between(node.getRefreshTime(),now).toMillis()>refreshDurateMills*2){
-            return false;
-          }
-          return true;
-        }).collect(Collectors.toList());
-        // 先判断是否有主节点,如果没有主节点
-        if(realAliveNodes.stream().filter(DbNode::getMasterOrNot).findAny().isEmpty()){
-          // 如果自己不是最大的就不管
-
-          if(nodeTag.equals(realAliveNodes.stream().max(Comparator.comparingInt(DbNode::getElecteOrder)).get().getNodeTag())){
-            currentNode.setMasterOrNot(true);
-            dbNodeMapper.updateMasterState(currentNode);
-          }
-        }
-
-        if(currentNode.getMasterOrNot()){
-          // 第一，干掉标记存活却死掉的节点
-          aliveNodes.stream().forEach(node->{
-            if(Duration.between(node.getRefreshTime(),now).toMillis()>refreshDurateMills*2){
-              node.setAliveOrNot(false);
-              dbNodeMapper.updateAliveState(node);
+          // 判断主节点假活
+          var masterNode=dbNodeMapper.getMasterNode();
+          if(masterNode!=null){
+            if(Duration.between(masterNode.getRefreshTime(),now).toMillis()>refreshDurateMills*2){
+              masterNode.setMasterOrNot(false);
+              masterNode.setUpdateTime(now);
+              masterNode.setUpdateNodeTag(nodeTag);
+              dbNodeMapper.updateMasterState(masterNode);
             }
-          });
-          // 第二，死掉的节点如果有标记为主节点的，修改为非主节点
-          var deadNodes=dbNodeMapper.getAllDeadDbNodes();
-          deadNodes.stream().filter(DbNode::getMasterOrNot).forEach(node->{
-            node.setMasterOrNot(false);
-            dbNodeMapper.updateMasterState(node);
-          });
+          }
+
+          // 获取所有活着的节点
+          var aliveNodes=dbNodeMapper.getAllAliveDbNodes();
+          var realAliveNodes=aliveNodes.stream().filter(node->{
+            if(Duration.between(node.getRefreshTime(),now).toMillis()>refreshDurateMills*2){
+              return false;
+            }
+            return true;
+          }).collect(Collectors.toList());
+          // 先判断是否有主节点,如果没有主节点
+          if(realAliveNodes.stream().filter(DbNode::getMasterOrNot).findAny().isEmpty()){
+            // 如果自己不是最大的就不管
+
+            if(nodeTag.equals(realAliveNodes.stream().max(Comparator.comparingInt(DbNode::getElecteOrder)).get().getNodeTag())){
+              currentNode.setMasterOrNot(true);
+              currentNode.setUpdateTime(now);
+              currentNode.setUpdateNodeTag(nodeTag);
+              dbNodeMapper.updateMasterState(currentNode);
+            }
+          }
+
+          if(currentNode.getMasterOrNot()){
+            // 第一，干掉标记存活却死掉的节点
+            aliveNodes.stream().forEach(node->{
+              if(Duration.between(node.getRefreshTime(),now).toMillis()>refreshDurateMills*2){
+                node.setAliveOrNot(false);
+                node.setUpdateTime(now);
+                node.setUpdateNodeTag(nodeTag);
+                dbNodeMapper.updateAliveState(node);
+              }
+            });
+            // 第二，死掉的节点如果有标记为主节点的，修改为非主节点
+            var deadNodes=dbNodeMapper.getAllDeadDbNodes();
+            deadNodes.stream().filter(DbNode::getMasterOrNot).forEach(node->{
+              node.setMasterOrNot(false);
+              node.setUpdateTime(now);
+              node.setUpdateNodeTag(nodeTag);
+              dbNodeMapper.updateMasterState(node);
+            });
+          }
+        }catch (Exception e){
+          e.printStackTrace();
         }
       }
     };
