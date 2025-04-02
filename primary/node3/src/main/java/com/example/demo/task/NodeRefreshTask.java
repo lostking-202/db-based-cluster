@@ -101,6 +101,7 @@ public class NodeRefreshTask implements InitializingBean {
             deadNodes.stream().filter(DbNode::getMasterOrNot).forEach(node->{
               node.setMasterOrNot(false);
               node.setUpdateTime(now);
+              node.setClusterState(ClusterState.DEAD);
               node.setUpdateNodeTag(nodeTag);
               dbNodeMapper.updateMasterState(node);
             });
@@ -123,7 +124,7 @@ public class NodeRefreshTask implements InitializingBean {
                 dbNodeMapper.updateClusterState(node);
               });
               // 切换一次就够了
-              aliveNodes.stream().filter(node->node.getClusterState()!=ClusterState.WORK).forEach(node->{
+              realAliveNodes.stream().filter(node->node.getClusterState()!=ClusterState.WORK).forEach(node->{
                 node.setClusterState(ClusterState.WORK);
                 node.setUpdateTime(now);
                 node.setUpdateNodeTag(nodeTag);
